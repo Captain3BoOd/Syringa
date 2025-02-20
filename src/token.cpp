@@ -45,6 +45,7 @@ static const std::unordered_map<std::string, KeyWord> Keywords = {
 	{ "fun", KeyWord::FUN },
 	{ "lambda", KeyWord::LAMBDA },
 	{ "class", KeyWord::CLASS },
+	{ "import", KeyWord::IMPORT },
 	// { "null", KeyWord::NULl },
 	{ "", KeyWord::NONE },
 };

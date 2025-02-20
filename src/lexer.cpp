@@ -18,7 +18,8 @@ const std::unordered_set<std::string> KEYWORDS = {
 	"break",
 	"fun",
 	"lambda",
-	"class"
+	"class",
+	"import"
 };
 
 Lexer::Lexer(const std::string& file_name, const std::string& text):
@@ -225,6 +226,11 @@ std::vector<Token>& Lexer::makeTokens()
 			else if (this->current_char == '-')
 			{
 				this->Tokens.emplace_back(TokenType::TT_MINUS_MINUS, "--", pos, this->pos);
+				this->advance();
+			}
+			else if (this->current_char == '>')
+			{
+				this->Tokens.emplace_back(TokenType::TT_ARROW, "->", pos, this->pos);
 				this->advance();
 			}
 			else this->Tokens.emplace_back(TokenType::TT_MINUS, "-", this->pos);

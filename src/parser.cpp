@@ -30,6 +30,12 @@ constexpr std::initializer_list<TokenType> Allowed = {
 	TokenType::TT_LBRACE
 };
 
+inline bool operator==(Token* token, TokenType type)
+{
+	if (token) return (*token) == type;
+	return false;
+}
+
 NodeVector& Parser::Parse()
 {
 	if (in(this->current_token->type, Allowed))
@@ -265,6 +271,28 @@ Node* Parser::make_fun_def()
 		InvalidSyntaxError(this->current_token->pos_start, this->current_token->pos_end, "Expected '('");
 	} else this->advance();
 
+	// Return type(s)
+	std::vector<std::string> return_types;
+	if (*this->current_token == TokenType::TT_ARROW)
+	{
+		this->advance();
+		if (*this->current_token == TokenType::TT_IDENTIFIER)
+		{
+			return_types.emplace_back(this->current_token->value);
+			this->advance();
+
+			while (*this->current_token == TokenType::TT_BIT_OR)
+			{
+				this->advance();
+				if (*this->current_token == TokenType::TT_IDENTIFIER)
+				{
+					return_types.emplace_back(this->current_token->value);
+					this->advance();
+				} else InvalidSyntaxError(this->current_token->pos_start, this->current_token->pos_end, "Expected type");
+			}
+		} else InvalidSyntaxError(this->current_token->pos_start, this->current_token->pos_end, "Expected type");
+	}
+
 	// Parameters
 	std::vector<Fun::Argument> parameters;
 	uint64_t co_argcount = 0;
@@ -341,7 +369,7 @@ Node* Parser::make_fun_def()
 		}
 	}
 
-	return new Fun(fun_name, co_argcount, default_count, parameters, expressions, is_class, start_pos, this->current_token->pos_end);
+	return new Fun(fun_name, co_argcount, default_count, parameters, expressions, return_types, is_class, start_pos, this->current_token->pos_end);
 }
 
 Node* Parser::make_lambda()
@@ -352,6 +380,28 @@ Node* Parser::make_lambda()
 	{	
 		InvalidSyntaxError(this->current_token->pos_start, this->current_token->pos_end, "Expected '('");
 	} else this->advance();
+
+	// Return type(s)
+	std::vector<std::string> return_types;
+	if (*this->current_token == TokenType::TT_ARROW)
+	{
+		this->advance();
+		if (*this->current_token == TokenType::TT_IDENTIFIER)
+		{
+			return_types.emplace_back(this->current_token->value);
+			this->advance();
+
+			while (*this->current_token == TokenType::TT_BIT_OR)
+			{
+				this->advance();
+				if (*this->current_token == TokenType::TT_IDENTIFIER)
+				{
+					return_types.emplace_back(this->current_token->value);
+					this->advance();
+				} else InvalidSyntaxError(this->current_token->pos_start, this->current_token->pos_end, "Expected type");
+			}
+		} else InvalidSyntaxError(this->current_token->pos_start, this->current_token->pos_end, "Expected type");
+	}
 
 	// Parameters
 	std::vector<Fun::Argument> parameters;
@@ -412,7 +462,7 @@ Node* Parser::make_lambda()
 	Node* body = this->block<true>();
 	NodeVector& expressions = static_cast<Block*>(body)->expressions;
 
-	return new Fun("<anonymous>", co_argcount, default_count, parameters, expressions, false, start_pos, this->current_token->pos_end);
+	return new Fun("<anonymous>", co_argcount, default_count, parameters, expressions, return_types, false, start_pos, this->current_token->pos_end);
 }
 
 Fun::Argument Parser::make_arg()
@@ -453,6 +503,16 @@ Fun::Argument Parser::make_arg()
 	}
 
 	return { tok, type, Default };
+}
+
+Node* Parser::make_import()
+{
+	Position pos(this->current_token->pos_start);
+	std::string module_path = this->current_token->value + "." exten;
+	this->advance();
+
+
+	return new Import(module_path, pos, this->current_token->pos_end);
 }
 
 void Parser::make_statements()
@@ -544,6 +604,13 @@ Node* Parser::make_statement()
 		Node* For = this->make_for<is_return>();
 
 		return For;
+	}
+	else if (*this->current_token == KeyWord::IMPORT)
+	{
+		this->advance();
+		Node* import_module = this->make_import();
+
+		return import_module;
 	}
 
 	return this->make_expression();
@@ -871,7 +938,8 @@ Node* Parser::factor()
 		this->advance();
 		Node* left = this->factor();
 
-		// if (op == TokenType::TT_BIT_AND) InvalidSyntaxError(left->start_pos, left->start_pos, "");
+		if (op == TokenType::TT_BIT_AND && *left != NodeType::ACCESS)
+			InvalidSyntaxError(left->start_pos, left->end_pos, "Expected Variable name");
 
 		result = new UnaryOp(left, op, start_pos, this->current_token->pos_end);
 	}

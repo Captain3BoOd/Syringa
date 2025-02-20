@@ -51,7 +51,9 @@ enum class TokenType : uint8_t
 	TT_RBRACE,
 	TT_COMMA,
 	TT_DOT,
+	TT_ARROW,
 	TT_SEMI_COLON,
+/*******************************/
 	TT_WHITE_SPACE,
 	TT_NEW_LINE,
 	TT_EOF,
@@ -75,6 +77,7 @@ enum class KeyWord: uint8_t
 	LAMBDA,
 	CLASS,
 	// NULl,
+	IMPORT,
 	NONE
 };
 

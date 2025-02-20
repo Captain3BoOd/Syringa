@@ -23,6 +23,8 @@ private:
 	Node* make_lambda();
 	Fun::Argument make_arg();
 	/***********************/
+	Node* make_import();
+	/***********************/
 	void make_statements();
 	/**********************************************************/
 	template<bool is_return = false, bool is_con_break = false>

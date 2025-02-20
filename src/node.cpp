@@ -67,6 +67,7 @@ Fun::Fun(
 	uint64_t default_count,
 	const std::vector<Argument>& elements,
 	const NodeVector& body,
+	const std::vector<std::string>& return_types,
 	bool in_class,
 	Position start_pos,
 	Position end_pos
@@ -76,6 +77,7 @@ Fun::Fun(
 	co_argcount(co_argcount),
 	default_count(default_count),
 	elements(elements),
+	return_types(return_types),
 	body(body),
 	in_class(in_class)
 {
@@ -398,6 +400,15 @@ void NClass::destroy()
 		}
 	}
 }
+
+/*******************************************************************************************/
+/*****************************************(IMPORT)******************************************/
+/*******************************************************************************************/
+
+Import::Import(const std::string& module_path, Position start_pos, Position end_pos):
+	Node(NodeType::IMPORT, start_pos, end_pos),
+	module_path(module_path)
+{}
 
 /*******************************************************************************************/
 /***************************************(CLASS CALL)****************************************/

@@ -26,6 +26,7 @@ enum class NodeType: uint8_t
 	BREAK,
 	CLASS,
 	CLASS_CALL,
+	IMPORT,
 	NONE
 };
 
@@ -108,6 +109,7 @@ struct Fun: public Node
 		uint64_t default_count,
 		const std::vector<Argument>& elements,
 		const NodeVector& body,
+		const std::vector<std::string>& return_types,
 		bool in_class,
 		Position start_pos,
 		Position end_pos
@@ -116,6 +118,7 @@ struct Fun: public Node
 
 	std::string name;
 	std::vector<Argument> elements;
+	std::vector<std::string> return_types;
 	NodeVector body;
 	uint64_t co_argcount;
 	uint64_t default_count;
@@ -312,6 +315,20 @@ struct ClassCall : public Node
 
 	Node* class_node;
 	Node* member_node;
+};
+
+/*******************************************************************************************/
+/*****************************************(IMPORT)******************************************/
+/*******************************************************************************************/
+
+#include <filesystem>
+
+struct Import: public Node
+{
+	Import(const std::string& path, Position start_pos, Position end_pos);
+	virtual void destroy() override {};
+
+	std::filesystem::path module_path;
 };
 
 /*******************************************************************************************/
