@@ -19,6 +19,9 @@ Support for Object-Oriented Programming is implemented! You can define your own 
   ### ➕ _Operator Overloading_
 The interpreter supports operator overloading, allowing you to define specific behaviors for operators like +, -, *, /, and more, within your custom classes.
 
+  ### ⨐ _Function Overloading_
+The interpreter supports function overloading, allowing you to define different behaviors for same function name.
+
   ### 📜 _Execution System and Parser_
 The architecture of the interpreter includes a robust parser and execution system that translates Syringa code into executable operations. This allows for dynamic interpretation and real-time code execution.
 
@@ -38,9 +41,11 @@ To manage memory efficiently, the project includes an integrated garbage collect
 
 ## 🐞 _Bugs_
 There are some bugs in this project such as:
-  + An infinite loop when there is an error during parsing
   + Run-Time Error when creating nested classes or functions.
-  + Some other bugs
+  + An infinite loop when there is an error during parsing
+  + Modules, Classes, Instances.
+  + Scopes bugs.
+  + Some other bugs.
 
 
 
@@ -54,13 +59,13 @@ $ make
 ```
 
 # 🚀 Future steps:
-
-  + Set, Dict.
+  + Set, Dict, Pointers, Byte Code, etc.
+  + Static typing for variables and functions.
   + BigInt class with Karatsuba algorithm.
   + REPL mode.
   + Virtual Machine.
   + Better type checking and error handling.
-  + Modules.
+  + Fixing All bugs.
   + Iterator and generator objects.
   + Inheritance.
   + New error types.
@@ -70,7 +75,6 @@ $ make
 This project is under continuous development, with new features being added regularly. If you’re passionate about Syringa, C++, or just interested in contributing to an exciting open-source project, feel free to jump in!
 
 ## How to Contribute
-
  + Fork this repository.
  + Create a new branch for your feature (git checkout -b feature/NewFeature).
  + Commit your changes (git commit -m 'Add NewFeature').
