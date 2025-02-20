@@ -24,6 +24,7 @@ public:
 	SymbolTable& get_vars();
 private:
 	InterpreterResult evaluate_all();
+	InterpreterResult evaluate_module(Node* tree);
 	void evaluate_fun_def(Node* tree, SymbolTable& symboltable);
 	void evaluate_class_def(Node* tree, SymbolTable& symboltable);
 	InterpreterResult evaluate(Node* tree);
