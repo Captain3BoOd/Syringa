@@ -1,7 +1,10 @@
 #pragma once
 
 #include <initializer_list>
+#include <iostream>
+#include <fstream>
 #include <cstdint>
+#include <string>
 #include <vector>
 
 template<typename element>

@@ -9,13 +9,10 @@
 #include <memory>
 #include <vector>
 
+#include "../syringa.hpp"
 #include "debug.hpp"
-#include "const.hpp"
 
 /*************************************************************************/
-template<typename T>
-using Ref = std::unique_ptr<T>;
-
 template<typename T>
 using Ptr = std::shared_ptr<T>;
 

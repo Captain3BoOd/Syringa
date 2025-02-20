@@ -4,7 +4,7 @@
 	#define DONE(step_name) std::cout <<  #step_name " Done!" << std::endl
 	#ifdef _MSC_VER
 		#include <crtdbg.h>
-		#define LANG_ASSERT(condition, ...) _ASSERT_EXPR(condition, __VA_ARGS__)
+	#define LANG_ASSERT(condition, ...) _ASSERT_EXPR(condition, L#__VA_ARGS__)
 	#else
 		#include <cassert>
 		#include <stdio.h>
