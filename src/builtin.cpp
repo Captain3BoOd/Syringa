@@ -1,10 +1,12 @@
 #include <iostream>
 
+#define INTERPRETER
 #include "lexer.hpp"
 #include "parser.hpp"
-#include "others.hpp"
+#include "objects.hpp"
 #include "builtin.hpp"
 #include "interpreter.hpp"
+#undef INTERPRETER
 
 extern const Node* current_node;
 
@@ -18,7 +20,7 @@ namespace BuiltIn
 		for (const ObjectPtr& text: texts)
 			std::cout << text->__str__();
 
-		return std::make_shared<None>();
+		return make_none();
 	}
 
 	ObjectPtr input(ObjectVector& params)
@@ -27,7 +29,7 @@ namespace BuiltIn
 		std::cout << params[0]->__str__();
 
 		std::cin >> input;
-		return std::make_shared<Str>(input);
+		return make_str(input);
 	}
 
 	ObjectPtr id(ObjectVector& params)
@@ -37,6 +39,6 @@ namespace BuiltIn
 
 	ObjectPtr info(ObjectVector& params)
 	{
-		return std::make_shared<Str>(params[0]->__info__());
+		return make_str(params[0]->__info__());
 	}
 }
