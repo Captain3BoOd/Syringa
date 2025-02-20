@@ -1,7 +1,7 @@
 #define INTERPRETER
 #include "function.hpp"
-#include "builtin.hpp"
 #include "interpreter.hpp"
+#include "builtin.hpp"
 #undef INTERPRETER
 
 extern const Node* current_node;

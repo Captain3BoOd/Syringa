@@ -9,6 +9,7 @@ struct SymbolInfo
 		NONE = 0,
 		VARIABLE,
 		FUNCTION,
+		MODULE,
 		CONST,
 		CLASS
 	};
@@ -25,6 +26,7 @@ public:
 		NOT_FOUNDED,
 		FUNCTION,
 		SUCCESS,
+		MODULE,
 		CLASS,
 		CONST
 	};

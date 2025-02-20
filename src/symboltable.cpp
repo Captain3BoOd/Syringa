@@ -1,5 +1,5 @@
 #include "symboltable.hpp"
-#include "object.hpp"
+#include "objects.hpp"
 #include "help.hpp"
 
 SymbolTable::SymbolTable(SymbolTable* parent):
@@ -20,6 +20,7 @@ void SymbolTable::add(const std::string& var_name, ObjectPtr value, bool is_cons
 	SymbolInfo::VarType var_type = is_const ? SymbolInfo::VarType::CONST : SymbolInfo::VarType::VARIABLE;
 	if (value->get_type() == ObjectType::FUNCTION) var_type = SymbolInfo::VarType::FUNCTION;
 	else if (value->get_type() == ObjectType::CLASS) var_type = SymbolInfo::VarType::CLASS;
+	else if (value->get_type() == ObjectType::MODULE) var_type = SymbolInfo::VarType::MODULE;
 
 	SymbolInfo symbol{ var_type, AssignObjects(value) };
 	this->variables.insert({ var_name, symbol });
@@ -63,6 +64,7 @@ SymbolTable::AssignResult SymbolTable::set(const std::string& var_name, ObjectPt
 		}
 		else if (var.type == SymbolInfo::VarType::CONST) result = AssignResult::CONST;
 		else if (var.type == SymbolInfo::VarType::CLASS) result = AssignResult::CLASS;
+		else if (var.type == SymbolInfo::VarType::MODULE) result = AssignResult::MODULE;
 		else if (var.type == SymbolInfo::VarType::FUNCTION) result = AssignResult::FUNCTION;
 	} else if (this->parent) result = this->parent->set(var_name, value);
 
