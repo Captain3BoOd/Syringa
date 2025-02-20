@@ -7,9 +7,16 @@
 #include "builtin.hpp"
 #include "parser.hpp"
 #include "lexer.hpp"
+#include "make.hpp"
+#include "help.hpp"
 
-static std::string Read_file(std::filesystem::path path);
-static bool Write_file(std::filesystem::path path, std::string_view code);
+std::vector<NodeVector> all_nodes;
+SymbolTable global_symbol_table;
+
+inline NodeVector lex_parse(const std::string& file_name, const std::string& code);
+inline bool Write_file(std::filesystem::path path, std::string_view code);
+inline std::pair<std::string, bool> Read_file(std::filesystem::path path);
+inline void init_global_symbol_table();
 
 int main(const int argc, const char* argv[])
 {
@@ -21,17 +28,50 @@ int main(const int argc, const char* argv[])
 	const std::filesystem::path file_path = args[0];
 	const std::string file_name = file_path.string();
 	const std::string file_name_stem = file_path.stem().string();
-	const std::string code = Read_file(file_path);
+	const auto [code, status] = Read_file(file_path);
 
+	if (!status) std::cerr << "file " + file_name + "not found" << std::endl;
 	if (code.empty()) return 0;
+	NodeVector trees = lex_parse(file_name, code);
+	if (trees.empty()) return 0;
+	all_nodes.emplace_back(trees);
 
-	Lexer lexer(file_name.empty()? "<stdin>" : file_name, code);
+	Interpreter interpreter(trees, &global_symbol_table);
+	init_global_symbol_table();
+	/***************************************************************************/
+	try { interpreter.interpret(); }
+	catch (const ObjectPtr& error) { std::cerr << std::endl << error->__str__() << std::endl; }
+	DONE(interpreter);
+	/***************************************************************************/
+	for (NodeVector& trees : all_nodes) DestroyNodes(trees);
+	DONE(Destroing All Nodes);
+}
+
+inline void init_global_symbol_table()
+{
+	#define ADD(name, value, is_const) global_symbol_table.add(name, value, is_const)
+	/*****************************************************************************************/
+	/* Functions */
+	ADD("print", make_function("print", BuiltIn::print, 1, 0, {}), true);
+	ADD("info", make_function("print", BuiltIn::info, 1, 1, {}), true);
+	ADD("input", make_function("input", BuiltIn::input, 1, 1, {}), true);
+	ADD("address", make_function("id", BuiltIn::print, 1, 1, {}), true);
+
+	/* Variables */
+	ADD("None", make_none(), true);
+	/*****************************************************************************************/
+	#undef ADD(name, value, is_const)
+}
+
+NodeVector lex_parse(const std::string& file_name, const std::string& code)
+{
+	Lexer lexer(file_name, code);
 	std::vector<Token>& tokens = lexer.makeTokens();
 	if (!Errors.empty())
 	{
 		for (Errorr error : Errors)
 			std::cout << error << '\n';
-		return 0;
+		return {};
 	}
 	DONE(lexer);
 
@@ -43,45 +83,18 @@ int main(const int argc, const char* argv[])
 			std::cout << error << '\n';
 
 		DestroyNodes(trees);
-		return 0;
+		return {};
 	}
 	tokens.clear();
 	DONE(parser);
 
-	Interpreter interpreter(trees);
-	SymbolTable& global_symbol = interpreter.get_vars();
-
-	#pragma region Built In Objects
-	{
-		/* Functions */
-		global_symbol.add("print", make_function("print", BuiltIn::print, 1, 0, {}), true);
-		global_symbol.add("info", make_function("print", BuiltIn::info, 1, 1, {}), true);
-		global_symbol.add("input", make_function("input", BuiltIn::input, 1, 1, {}), true);
-		global_symbol.add("address", make_function("id", BuiltIn::print, 1, 1, {}), true);
-
-		/* Variables */
-		global_symbol.add("None", make_none(), true);
-	}
-	#pragma endregion
-	/***************************************************************************/
-	try { interpreter.interpret(); }
-	catch (const ObjectPtr& error) { std::cout << std::endl << error->__str__() << std::endl; }
-	DONE(interpreter);
-	/***************************************************************************/
-	DestroyNodes(trees);
-	DONE(Destroing Nodes);
+	return trees;
 }
 
-std::string Read_file(std::filesystem::path path)
+inline std::pair<std::string, bool> Read_file(std::filesystem::path path)
 {
 	std::ifstream file(path);
-
-	if (!file.is_open())
-	{
-		std::cerr << "File didin't found" << std::endl;
-		return "";
-	}
-
+	if (!file.is_open()) return { "", false };
 	std::string text, line;
 
 	while (std::getline(file, line))
@@ -91,10 +104,10 @@ std::string Read_file(std::filesystem::path path)
 		if (text.back() == '\n')
 			text.pop_back();
 
-	return text;
+	return { text, true };
 }
 
-bool Write_file(std::filesystem::path path, std::string_view code)
+inline bool Write_file(std::filesystem::path path, std::string_view code)
 {
 	std::ofstream file(path);
 
