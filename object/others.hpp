@@ -11,32 +11,16 @@
 #include "node.hpp"
 
 /*******************************************************************************************/
-/******************************************(Module)*****************************************/
-/*******************************************************************************************/
-
-class Module: public Object
-{
-public:
-	Module(const std::string& module_name, const std::string& module_path);
-
-	bool __bool__() const override { return true; }
-	std::string __info__() const override;
-	std::string __str__() const override;
-	void init_class_built_in() override;
-private:
-	std::string module_name;
-	std::string module_path;
-};
-
-/*******************************************************************************************/
 /*******************************************(Class)*****************************************/
 /*******************************************************************************************/
+
 class Class: public Object
 {
 public:
 	Class(const std::string& class_name = "");
-	inline void set(const std::string& class_name) { this->class_name = class_name;  };
-	inline const std::string& get() { return this->class_name; };
+	inline void set(const std::string& class_name) { this->class_name = class_name; }
+	inline const std::string& get() const { return this->class_name; }
+	bool operator==(const Class& other) { return this->class_name == other.class_name; }
 
 	bool __bool__() const override { return true; }
 	std::string __info__() const override;
@@ -47,25 +31,22 @@ private:
 };
 
 /*******************************************************************************************/
-/***************************************(User_Object)***************************************/
+/***************************************(Instance)***************************************/
 /*******************************************************************************************/
 
-class User_Object: public Object
+class Instance: public Object
 {
 public:
-	User_Object(const Class& _class);
-	User_Object(const User_Object& other);
+	Instance(const Class& _class);
+	Instance(const Instance& other);
 
 	bool __bool__() const override { return true; }
-	const Class& get_class() const { return this->_class; }
 	std::string __info__() const override;
 	std::string __str__() const override;
 	void init_class_built_in() override;
-private:
-	const Class& _class;
 };
 
-ObjectPtr make_user_object(const User_Object& user_object);
+ObjectPtr make_instance(const Instance& user_object);
 
 /*******************************************************************************************/
 /********************************************(INT)******************************************/
@@ -236,100 +217,6 @@ public:
 	std::string __info__() const override;
 	std::string __str__() const override;
 	void init_class_built_in() override;
-};
-
-/*******************************************************************************************/
-/*******************************************(POINTER)***************************************/
-/*******************************************************************************************/
-
-class Pointer: public Object
-{
-public:
-	Pointer(const ObjectPtr& object);
-	/************************************/
-	bool __bool__() const override;
-	std::string __info__() const override;
-	std::string __str__() const override;
-	void init_class_built_in() override;
-private:
-	WeakObject object;
-};
-
-/*******************************************************************************************/
-/******************************************(FUNCTION)***************************************/
-/*******************************************************************************************/
-
-struct FinalResult;
-class BuiltInFunction;
-class Function;
-
-class BaseFunction : public Object
-{
-public:
-	BaseFunction(
-		const std::string& fun_name,
-		uint64_t arg_count,
-		uint64_t co_argcount,
-		uint64_t default_count
-	);
-	BaseFunction(const std::string& fun_name, BuiltInFunction* fun);
-	BaseFunction(const std::string& fun_name, Function* fun);
-	~BaseFunction() { if (this->function) delete this->function; }
-
-	virtual inline ObjectPtr run(ObjectVector& args) { return this->function->evaluate(this->get_symbols(), args); };
-	virtual ObjectPtr evaluate(SymbolTable& parent, ObjectVector& args);
-	virtual std::string __str__() const override { return this->function->__str__(); }
-	virtual std::string __info__() const override { return this->function->__info__(); }
-	bool __bool__() const override { return true; }
-	void init_class_built_in() override;
-public:
-	std::string fun_name;
-protected:
-	uint64_t arg_count;
-	uint64_t co_argcount;
-	uint64_t default_count;
-private:
-	BaseFunction* function;
-};
-
-// Built-in //
-class BuiltInFunction : public BaseFunction
-{
-public:
-	BuiltInFunction(
-		const std::string& fun_name,
-		const FunctionType& function,
-		uint64_t params_number,
-		uint64_t co_argcount,
-		const ObjectVector& defaults
-	);
-	ObjectPtr evaluate(SymbolTable& parent, ObjectVector& params);
-public:
-	std::string __str__() const override;
-	std::string __info__() const override;
-private:
-	const ObjectVector defaults;
-	FunctionType function;
-};
-
-// Normal //
-class Function : public BaseFunction
-{
-public:
-	Function(
-		const std::string& fun_name,
-		const std::vector<Fun::Argument>& parameters,
-		uint64_t co_argcount,
-		uint64_t default_count,
-		const NodeVector& body
-	);
-	ObjectPtr evaluate(SymbolTable& parent, ObjectVector& params) override;
-public:
-	std::string __str__() const override;
-	std::string __info__() const override;
-private:
-	std::vector<Fun::Argument> parameters;
-	NodeVector body;
 };
 
 /*******************************************************************************************/
